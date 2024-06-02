@@ -1,23 +1,47 @@
 package com.sample.ecommerceapplication.service;
+
+import com.sample.ecommerceapplication.dto.FakeStoreProductDto;
 import com.sample.ecommerceapplication.model.Product;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class FakeStoreProductService implements ProductService{
-    @Override
-    public Product getSingleProduct(Long productId) {
-        return null;
-    }
 
-    @Override
-    public List<Product> getAllProducts() {
-        return null;
+    private final RestTemplate restTemplate;
+
+    public FakeStoreProductService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     @Override
     public Product createProduct(Product product) {
-        return null;
+        // Convert the Product to a FakeStoreProductDto
+        FakeStoreProductDto fsDto = FakeStoreProductDto.fromProduct(product);
+
+        // Send a POST request to the fake store API and get the response
+        FakeStoreProductDto fakeStoreProductDto = restTemplate.postForObject(
+                "https://fakestoreapi.com/products",
+                fsDto,
+                FakeStoreProductDto.class
+        );
+
+        // Convert the response to a Product if it's not null
+        return fakeStoreProductDto != null ? fakeStoreProductDto.toProduct() : null;
+    }
+
+    @Override
+    public Product getSingleProduct(Long productId) {
+        // Fetch the FakeStoreProductDto from the API
+        FakeStoreProductDto fakeStoreProductDto = restTemplate.getForObject(
+                "https://fakestoreapi.com/products/" + productId,
+                FakeStoreProductDto.class
+        );
+
+        // Convert the response to a Product if it's not null
+        return fakeStoreProductDto != null ? fakeStoreProductDto.toProduct() : null;
     }
 }

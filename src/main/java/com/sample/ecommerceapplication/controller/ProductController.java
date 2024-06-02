@@ -1,29 +1,26 @@
 package com.sample.ecommerceapplication.controller;
 
-
+import com.sample.ecommerceapplication.model.Product;
 import com.sample.ecommerceapplication.service.ProductService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ProductController {
 
-    private ProductService productService;
+    private final ProductService productService;
 
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
     @PostMapping("/products")
-    public void createProduct() {
-
+    public Product createProduct(@RequestBody Product product) {
+        return productService.createProduct(product);
     }
 
     @GetMapping("/products/{id}")
-    public void getProduct(@PathVariable("id") Long productId) {
-
+    public Product getProduct(@PathVariable("id") Long productId) {
+        return productService.getSingleProduct(productId);
     }
 
     @GetMapping("/products")
@@ -31,4 +28,3 @@ public class ProductController {
 
     }
 }
-
