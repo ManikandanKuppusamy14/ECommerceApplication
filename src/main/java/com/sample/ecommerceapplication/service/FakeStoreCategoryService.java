@@ -3,11 +3,14 @@ package com.sample.ecommerceapplication.service;
 import com.sample.ecommerceapplication.dto.FakeStoreCategoryDto;
 import com.sample.ecommerceapplication.exception.CategoryNotFoundException;
 import com.sample.ecommerceapplication.model.Category;
+import com.sample.ecommerceapplication.model.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FakeStoreCategoryService implements CategoryService {
@@ -19,26 +22,35 @@ public class FakeStoreCategoryService implements CategoryService {
     }
 
     @Override
-    public List<Category> getAllCategories() throws CategoryNotFoundException {
+    public List<String> getAllCategories() throws CategoryNotFoundException {
 
-        List<Category> categories = new ArrayList<>();
-
-        // Fetch the array of FakeStoreCategoryDto from the API
-        FakeStoreCategoryDto[] res = restTemplate.getForObject(
+        // Fetch the array of category titles from the API
+        String[] categories = restTemplate.getForObject(
                 "https://fakestoreapi.com/products/categories",
-                FakeStoreCategoryDto[].class
+                String[].class
         );
 
         // Check if the response is null or empty
-        if (res == null || res.length == 0) {
+        if (categories == null) {
             throw new CategoryNotFoundException("No categories found");
         }
 
-        // Convert each FakeStoreCategoryDto to a Product and add to the list
-        for (FakeStoreCategoryDto fs : res) {
-            categories.add(fs.toCategory());
+        return Arrays.asList(categories);
+    }
+
+    @Override
+    public List<Product> getProductsByCategory(String category) throws CategoryNotFoundException {
+
+        // Fetch the array of products from the API
+        Product[] products = restTemplate.getForObject(
+                "https://fakestoreapi.com/products/category/" + category
+                , Product[].class);
+
+        // Convert the array to a list and return
+        if (products != null) {
+            return Arrays.asList(products);
         }
 
-        return categories;
+        return null;
     }
 }

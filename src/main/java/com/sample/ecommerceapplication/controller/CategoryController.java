@@ -2,6 +2,7 @@ package com.sample.ecommerceapplication.controller;
 
 import com.sample.ecommerceapplication.exception.CategoryNotFoundException;
 import com.sample.ecommerceapplication.model.Category;
+import com.sample.ecommerceapplication.model.Product;
 import com.sample.ecommerceapplication.service.CategoryService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,12 @@ public class CategoryController {
     }
 
     @GetMapping("/products/categories")
-    public List<Category> getAllCategories() throws CategoryNotFoundException {
+    public List<String> getAllCategories() throws CategoryNotFoundException {
         return categoryService.getAllCategories();
+    }
+
+    @GetMapping("/products/category/{category}")
+    public List<Product> getProductsByCategory(@PathVariable String category) throws CategoryNotFoundException {
+        return categoryService.getProductsByCategory(category);
     }
 }

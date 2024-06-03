@@ -3,6 +3,7 @@ package com.sample.ecommerceapplication.service;
 import com.sample.ecommerceapplication.model.Product;
 import com.sample.ecommerceapplication.repositories.CategoryRepository;
 import com.sample.ecommerceapplication.repositories.ProductRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,8 +35,9 @@ public class SelfProductService implements ProductService{
     }
 
     @Override
-    public void deleteProduct(Long productId) {
+    public HttpStatus deleteProduct(Long productId) {
 
+        return HttpStatus.OK;
     }
 
     @Override

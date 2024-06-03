@@ -3,13 +3,13 @@ package com.sample.ecommerceapplication.service;
 import com.sample.ecommerceapplication.dto.FakeStoreProductDto;
 import com.sample.ecommerceapplication.exception.ProductNotFoundException;
 import com.sample.ecommerceapplication.model.Product;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service("FakeStoreProductService")
 public class FakeStoreProductService implements ProductService{
@@ -22,22 +22,16 @@ public class FakeStoreProductService implements ProductService{
 
     @Override
     public Product getSingleProduct(Long productId) throws ProductNotFoundException {
+
         // Fetch the FakeStoreProductDto from the API
-        ResponseEntity<FakeStoreProductDto> responseEntity = restTemplate.getForEntity(
+        FakeStoreProductDto fsDto = restTemplate.getForObject(
                 "https://fakestoreapi.com/products/" + productId,
                 FakeStoreProductDto.class
         );
 
-        // Check the response status
-        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            FakeStoreProductDto fakeStoreProductDto = responseEntity.getBody();
-
-            // Convert the response to a Product if it's not null
-            if (fakeStoreProductDto != null) {
-                return fakeStoreProductDto.toProduct();
-            } else {
-                throw new ProductNotFoundException("Product with ID " + productId + " not found");
-            }
+        // Convert the response to a Product if it's not null
+        if (fsDto != null) {
+            return fsDto.toProduct();
         } else {
             throw new ProductNotFoundException("Product with ID " + productId + " not found");
         }
@@ -45,25 +39,20 @@ public class FakeStoreProductService implements ProductService{
 
     @Override
     public Product createProduct(Product product) throws ProductNotFoundException {
-       // Convert the Product to a FakeStoreProductDto
+
+        // Convert the Product to a FakeStoreProductDto
         FakeStoreProductDto fsDto = FakeStoreProductDto.fromProduct(product);
 
         // Send a POST request to the fake store API and get the response
-        ResponseEntity<FakeStoreProductDto> responseEntity = restTemplate.postForEntity(
+        FakeStoreProductDto response = restTemplate.postForObject(
                 "https://fakestoreapi.com/products",
                 fsDto,
                 FakeStoreProductDto.class
         );
 
-        if (responseEntity.getStatusCode() == HttpStatus.CREATED) {
-            FakeStoreProductDto fakeStoreProductDto = responseEntity.getBody();
-
-            // Convert the response to a Product if it's not null
-            if (fakeStoreProductDto != null) {
-                return fakeStoreProductDto.toProduct();
-            } else {
-                throw new ProductNotFoundException("Failed to create product");
-            }
+        // Convert the response to a Product if it's not null
+        if (response != null) {
+            return response.toProduct();
         } else {
             throw new ProductNotFoundException("Failed to create product");
         }
@@ -71,7 +60,6 @@ public class FakeStoreProductService implements ProductService{
 
     @Override
     public List<Product> getAllProducts() throws ProductNotFoundException {
-        List<Product> products = new ArrayList<>();
         // Fetch the array of FakeStoreProductDto from the API
         FakeStoreProductDto[] res = restTemplate.getForObject(
                 "https://fakestoreapi.com/products",
@@ -82,6 +70,8 @@ public class FakeStoreProductService implements ProductService{
         if (res == null || res.length == 0) {
             throw new ProductNotFoundException("No products found");
         }
+
+        List<Product> products = new ArrayList<>();
 
         // Convert each FakeStoreProductDto to a Product and add to the list
         for (FakeStoreProductDto fs : res) {
@@ -96,18 +86,45 @@ public class FakeStoreProductService implements ProductService{
         // Convert Product to a FakeStoreProductDto
         FakeStoreProductDto fsDto = FakeStoreProductDto.fromProduct(product);
 
+        // Set the headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+
+        // Create the HTTP entity
+        HttpEntity<FakeStoreProductDto> entity = new HttpEntity<>(fsDto, headers);
+
         // Update the product on the API
-        restTemplate.put(
+        ResponseEntity<FakeStoreProductDto> response = restTemplate.exchange(
                 "https://fakestoreapi.com/products/" + productId,
-                fsDto
+                HttpMethod.PUT,
+                entity,
+                FakeStoreProductDto.class
         );
 
-        // Fetch and return the updated product
-        return getSingleProduct(productId);
+        // Check if the update was successful
+        if (response.getStatusCode().is2xxSuccessful()) {
+            // Fetch and return the updated product
+            return Objects.requireNonNull(response.getBody()).toProduct();
+        } else {
+            throw new ProductNotFoundException("Failed to update product with ID " + productId);
+        }
     }
 
     @Override
-    public void deleteProduct(Long productId) throws ProductNotFoundException{
-        restTemplate.delete("https://fakestoreapi.com/products/" + productId);
+    public HttpStatus deleteProduct(Long productId) throws ProductNotFoundException {
+        // Send the DELETE request
+        ResponseEntity<String> response = restTemplate.exchange(
+                "https://fakestoreapi.com/products/" + productId,
+                HttpMethod.DELETE,
+                null,
+                String.class
+        );
+
+        // Check if the delete was successful
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return HttpStatus.OK;
+        } else {
+            throw new ProductNotFoundException("Failed to delete product with ID " + productId);
+        }
     }
 }

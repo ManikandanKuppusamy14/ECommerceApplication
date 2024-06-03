@@ -20,4 +20,7 @@ public class Category extends BaseModel{
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private List<Product> products;
+
+    public Category(String title) {
+    }
 }
