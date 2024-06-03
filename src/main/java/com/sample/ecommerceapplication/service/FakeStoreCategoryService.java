@@ -1,18 +1,13 @@
 package com.sample.ecommerceapplication.service;
 
-import com.sample.ecommerceapplication.dto.FakeStoreCategoryDto;
 import com.sample.ecommerceapplication.dto.FakeStoreProductDto;
 import com.sample.ecommerceapplication.exception.CategoryNotFoundException;
-import com.sample.ecommerceapplication.exception.ProductNotFoundException;
-import com.sample.ecommerceapplication.model.Category;
 import com.sample.ecommerceapplication.model.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FakeStoreCategoryService implements CategoryService {

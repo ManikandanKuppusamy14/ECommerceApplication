@@ -1,9 +1,9 @@
 package com.sample.ecommerceapplication.controller;
 
 import com.sample.ecommerceapplication.exception.CategoryNotFoundException;
-import com.sample.ecommerceapplication.model.Category;
 import com.sample.ecommerceapplication.model.Product;
 import com.sample.ecommerceapplication.service.CategoryService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,7 +13,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(@Qualifier("SelfCategoryService") CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
