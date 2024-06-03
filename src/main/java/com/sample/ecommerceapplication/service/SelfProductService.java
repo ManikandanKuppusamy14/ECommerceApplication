@@ -69,14 +69,12 @@ public class SelfProductService implements ProductService{
         if (optionalProduct.isPresent()) {
             Product existingProduct = optionalProduct.get();
 
-            // Update the properties of the existing product with the values from the passed product
             existingProduct.setTitle(product.getTitle());
             existingProduct.setPrice(product.getPrice());
             existingProduct.setCategory(product.getCategory());
             existingProduct.setDescription(product.getDescription());
             existingProduct.setImageUrl(product.getImageUrl());
 
-            // Save the updated product to the database
             return productRepository.save(existingProduct);
         } else {
             throw new ProductNotFoundException("Product with ID " + productId + " not found");

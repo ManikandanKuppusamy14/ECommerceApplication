@@ -19,7 +19,7 @@ public class Product extends BaseModel {
     private double price;
     private String imageUrl;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.ALL})
     private Category category;
 
     @Override
