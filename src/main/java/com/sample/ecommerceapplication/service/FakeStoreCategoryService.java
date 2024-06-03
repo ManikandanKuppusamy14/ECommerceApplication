@@ -1,7 +1,9 @@
 package com.sample.ecommerceapplication.service;
 
 import com.sample.ecommerceapplication.dto.FakeStoreCategoryDto;
+import com.sample.ecommerceapplication.dto.FakeStoreProductDto;
 import com.sample.ecommerceapplication.exception.CategoryNotFoundException;
+import com.sample.ecommerceapplication.exception.ProductNotFoundException;
 import com.sample.ecommerceapplication.model.Category;
 import com.sample.ecommerceapplication.model.Product;
 import org.springframework.stereotype.Service;
@@ -30,27 +32,40 @@ public class FakeStoreCategoryService implements CategoryService {
                 String[].class
         );
 
-        // Check if the response is null or empty
-        if (categories == null) {
+        // Check if the categories is null or empty
+        if (categories == null || categories.length == 0) {
             throw new CategoryNotFoundException("No categories found");
         }
 
-        return Arrays.asList(categories);
+        List<String> categoryList = new ArrayList<>();
+
+        for (String category : categories) {
+            categoryList.add(category);
+        }
+
+        return categoryList;
     }
 
     @Override
     public List<Product> getProductsByCategory(String category) throws CategoryNotFoundException {
 
         // Fetch the array of products from the API
-        Product[] products = restTemplate.getForObject(
+        FakeStoreProductDto[] response = restTemplate.getForObject(
                 "https://fakestoreapi.com/products/category/" + category
-                , Product[].class);
+                , FakeStoreProductDto[].class);
 
-        // Convert the array to a list and return
-        if (products != null) {
-            return Arrays.asList(products);
+        // Check if the response is null or empty
+        if (response == null || response.length == 0) {
+            throw new CategoryNotFoundException("No products found");
         }
 
-        return null;
+        List<Product> products = new ArrayList<>();
+
+        // Convert each FakeStoreProductDto to a Product and add to the list
+        for (FakeStoreProductDto fs : response) {
+            products.add(fs.toProduct());
+        }
+
+        return products;
     }
 }
